@@ -21,11 +21,11 @@ def init_all(model):
 
 
 init_funcs = {
-    1: lambda x: torch.nn.init.normal_(x, mean=0., std=1.),  # can be bias
-    2: lambda x: torch.nn.init.xavier_normal_(x, gain=1.),  # can be weight
-    3: lambda x: torch.nn.init.xavier_uniform_(x, gain=1.),  # can be conv1D filter
-    4: lambda x: torch.nn.init.xavier_uniform_(x, gain=1.),  # can be conv2D filter
-    "default": lambda x: torch.nn.init.constant(x, 1.),  # everything else
+    1: lambda x: torch.nn.init.normal_(x, mean=0., std=1.),
+    2: lambda x: torch.nn.init.xavier_normal_(x, gain=1.),  
+    3: lambda x: torch.nn.init.xavier_uniform_(x, gain=1.),  
+    4: lambda x: torch.nn.init.xavier_uniform_(x, gain=1.), 
+    "default": lambda x: torch.nn.init.constant(x, 1.), 
 }
 
 
@@ -36,7 +36,7 @@ def run_net(train_loader, val_loader, weights, saver, network_type, epochs, cali
     model = functions_nn[network_type](classes).to(device)
     init_all(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    sheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[3, 12, 20, 30, 40, 50, 60, 70, 90],
+    sheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[3, 12, 20, 30, 40, 50, 60, 70, 90, 100],
                                                     gamma=0.9, last_epoch=-1)
 
     best_validation = - math.inf
@@ -51,6 +51,7 @@ def run_net(train_loader, val_loader, weights, saver, network_type, epochs, cali
         loss, train_acc = train.train(train_loader, model, optimizer, weights, calibration_method, classes)
         validation, val_acc = train.validate(val_loader, model, weights, calibration_method, classes)
 
+        
         if epoch > epochs / 3:
             not_changed_counter = not_changed_counter + 1
 
@@ -71,6 +72,7 @@ def run_net(train_loader, val_loader, weights, saver, network_type, epochs, cali
         print('Epoch: {:02d}, Loss: {:.4f}, Validation: {:.4f}, Validation_Acc: {:.4f}'.format(
             epoch, loss, validation, val_acc))
 
+
     return saved_model, best_epoch, best_epoch_acc
 
 
@@ -83,28 +85,11 @@ if __name__ == '__main__':
 
     cmdline_parser = argparse.ArgumentParser('cassette final prediction')
 
-    cmdline_parser.add_argument('-f', '--train_file_name',
-                                default="",
-                                help='Name of file',
-                                type=str)
-    cmdline_parser.add_argument('-t', '--test_file_name',
-                                default="",
-                                help='Name of test file',
-                                type=str)
-    cmdline_parser.add_argument('-v', '--validate_file_name',
-                                default="",
-                                help='Name of validation file',
-                                type=str)
-    cmdline_parser.add_argument('-c', '--completeness',
-                                default="partial",
-                                help='completeness',
-                                type=str)
-    cmdline_parser.add_argument('-z', '--add_infos',
-                                default="True",
-                                help='Additional information for classification',
-                                action='store_true')
+
+
+
     cmdline_parser.add_argument('-n', '--network_type',
-                                default="gru",
+                                default="gru2_bohb",
                                 help='network_type',
                                 type=str)
     cmdline_parser.add_argument('-m', '--calibration_method',
@@ -115,37 +100,54 @@ if __name__ == '__main__':
                                 default="./models/",
                                 help='path_to_save_models',
                                 type=str)
+    cmdline_parser.add_argument('-e', '--epochs',
+                                default=150,
+                                help='number of epochs',
+                                type=int)
+    cmdline_parser.add_argument('-b', '--batch_size',
+                                default=32,
+                                help='batch_size',
+                                type=int)
+    cmdline_parser.add_argument('-f','--train_file', 
+                                type=str, nargs='+', 
+                                action='append', 
+                                help='file list for training')
+    cmdline_parser.add_argument('-t','--test_file', 
+                                type=str, nargs='+', 
+                                action='append', 
+                                help='file list for testing')
+    cmdline_parser.add_argument('-v', '--val_file',
+                                type=str, nargs='+', 
+                                action='append', 
+                                help='file list for validation')
+                                
 
-    epochs = 150
-    BATCH_SIZE = 32
+    args, unknowns = cmdline_parser.parse_known_args()                                
+                                
+
+    epochs = args.epochs
+    BATCH_SIZE = args.batch_size
     test_results = []
     models_for_ens = 3
 
-    args, unknowns = cmdline_parser.parse_known_args()
-
-    files_train = args.train_file_name.split(";")
+    
+    files_train = args.train_file_name
+    files_test = args.test_file_name
+    files_validate = args.validate_file_name
+        
 
     classes = len(files_train)
-    class_names = [f.split("/")[-1].split("_")[0] for f in files_train]
+    class_names = [f[0].split(".fa")[0] for f in files_train]
 
-    files_train = [f.split(",") for f in files_train]
 
-    files_test = args.test_file_name.split(";")
-    files_test = [f.split(",") for f in files_test]
-
-    files_validate = args.validate_file_name.split(";")
-    files_validate = [f.split(",") for f in files_validate]
-
-    completeness = args.completeness
     calibration_method = args.calibration_method
-
-    add_infos = args.add_infos
     network_type = args.network_type
-
     dataset_train = database.MyOwnDatasetClass(files_train).return_data()
     dataset_test = database.MyOwnDatasetClass(files_test).return_data()
     dataset_validation = database.MyOwnDatasetClass(files_validate).return_data()
     weights = utils.calculate_weight_vector(dataset_train)
+    
+    
 
     train_loader = DataLoader(dataset=dataset_train, batch_size=BATCH_SIZE, shuffle=True)
     test_loader = DataLoader(dataset=dataset_test, batch_size=BATCH_SIZE, shuffle=True)

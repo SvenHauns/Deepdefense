@@ -7,6 +7,46 @@ import pickle
 import numpy as np
 
 
+    
+def save_to_output(data_list, output_file, file_name):
+
+    if data_list == []: return
+
+    file_ = open(output_file, "a")
+    
+    
+    for data in data_list:
+    
+        cassette_detected = ""
+        none_counter = 0
+        print(data[1][::-1])
+        for enum, d in enumerate(data[1][::-1]):
+            if d == "None":
+                none_counter = enum
+            else: break
+        
+        
+        for cas_type in data[1][:len(data[1])-none_counter -1]:
+            if cassette_detected != "": cassette_detected = cassette_detected + "_"
+            cassette_detected = cassette_detected + cas_type
+            
+        indeces = data[2]
+        
+        file_.write(file_name)
+        file_.write("\t")
+        file_.write(str(cassette_detected))
+        file_.write("\t")
+        file_.write(str(indeces[0: len(indeces)-none_counter -1]))
+        file_.write("\n")
+        
+    
+    file_.close()
+
+
+
+    return
+    
+
 def read_yaml(file_name):
     with open(file_name) as file:
         documents = yaml.full_load(file)
@@ -103,11 +143,13 @@ def extract_unique_list(confirmed_rules_dict):
     unique_list = []
 
     for key in confirmed_rules_dict.keys():
+    
 
         current_rule = confirmed_rules_dict[key][3]
         current_start = key.split("_")[1]
+        indeces = confirmed_rules_dict[key][4]
 
-        current_list = [current_start, current_rule]
+        current_list = [current_start, current_rule, indeces]
 
         if current_list not in unique_list:
             unique_list.append(current_list)
@@ -153,53 +195,29 @@ def check_order(input_rule):
 
 if __name__ == '__main__':
 
-    def str_to_bool(in_string):
-
-        if in_string == "True" or in_string == "true" or in_string == "TRUE":
-            return True
-
-        else:
-            return False
 
 
     cmdline_parser = argparse.ArgumentParser('cassette final prediction')
 
-    cmdline_parser.add_argument('-t', '--file_name',
+    cmdline_parser.add_argument('-t', '--data_folder',
                                 default="./Dru_ype1.faa",
                                 help='Name of file',
                                 type=str)
-    cmdline_parser.add_argument('-c', '--completenes',
-                                default="partial",
-                                help='completenes',
+    cmdline_parser.add_argument('-o', '--output_file_name',
+                                default="./output.txt",
+                                help='Name of output file',
                                 type=str)
-    cmdline_parser.add_argument('-z', '--add_infos',
-                                default="True",
-                                help='Additional information for classification',
-                                action='store_true')
-    cmdline_parser.add_argument('-m', '--load_genes',
-                                default="True",
-                                help='load genes or proteins',
-                                type=str)
-    cmdline_parser.add_argument('-s', '--start_value',
-                                default=0,
-                                help='start value for reading a file',
+    cmdline_parser.add_argument('-m', '--max_distance',
+                                default=2,
+                                help='max distance between detected genes',
                                 type=int)
-    cmdline_parser.add_argument('-a', '--calculate_infos',
-                                default="True",
-                                help='start value for reading a file',
-                                action='store_true')
-    cmdline_parser.add_argument('-x', '--base_class',
-                                default=0,
-                                help='start value for reading a file',
+    cmdline_parser.add_argument('-i', '--min_correspondence',
+                                default=2,
+                                help='minimum number of correspondences for a rule',
                                 type=int)
-    cmdline_parser.add_argument('-j', '--sub_class',
-                                default=0,
-                                help='start value for reading a file',
-                                type=int)
-    cmdline_parser.add_argument('-g', '--files_restirction',
-                                default=0,
-                                help='files to read from',
-                                type=int)
+                                
+
+
 
     args, unknowns = cmdline_parser.parse_known_args()
 
@@ -212,8 +230,8 @@ if __name__ == '__main__':
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    files = glob.glob("./deep_result_archea/" + "*.pkl")
-    second_files = "./deep_results2_com/"
+    files = glob.glob(args.data_folder + "*classification.pkl")
+    second_files = args.data_folder
 
     files = sorted(files)
     filter_cutoff = 0.3
@@ -230,7 +248,7 @@ if __name__ == '__main__':
               'JetA': 0.5488773294162843, 'JetB': 0.5666785275161094, 'JetC': 0.7427312126980701,
               'JetD': 0.5024555669358747, 'KwaA': 0.7721718331879318, 'KwaB': 0.5489610274356479,
               'LmuA': 0.5386696555682484, 'LmuB': 0.667394933203811, 'PtuA': 0.5123853729026722,
-              'PtuB': 0.6300281324261889, 'SduA': 0.5, 'ZorA': 0.8692443040839756, 'ZorB': 0.779199939376295,
+              'PtuB': 0.6300281324261889, 'SduA': 0.99, 'ZorA': 0.8692443040839756, 'ZorB': 0.779199939376295,
               'ZorC': 0.5772270157652536, 'ZorD': 0.5564549738181166, 'ZorE': 0.7237467068982661,
               'ThsA': 0.6048928067342549, 'ThsB': 0.5107287802712881}
 
@@ -246,7 +264,7 @@ if __name__ == '__main__':
         with open(file_, 'rb') as f:
             pred_dict = pickle.load(f)
 
-        with open(second_files + file_.split("/")[-1], 'rb') as f:
+        with open(second_files + file_.split("/")[-1].split("classification.pkl")[0] + "rejection.pkl", 'rb') as f:
             pos_neg_dict = pickle.load(f)
 
         dict_key = list(pred_dict.keys())[0]
@@ -265,6 +283,9 @@ if __name__ == '__main__':
 
         confirmed_rules_dict = check_order(confirmed_rules_dict)
         unique_list = extract_unique_list(confirmed_rules_dict)
+        
+        save_to_output(unique_list, args.output_file_name, file_)
+
 
         for un_list in unique_list:
             rule_count[un_list[1][0][:-1]] = rule_count[un_list[1][0][:-1]] + 1
