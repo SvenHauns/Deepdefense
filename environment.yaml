@@ -83,6 +83,7 @@ dependencies:
   - openssl=3.0.7=h0b41bf4_1
   - p11-kit=0.24.1=hc5aa10d_0
   - packaging=21.3=pyhd3eb1b0_0
+  - pandas=1.5.3=py39h2ad29b5_0
   - pillow=9.4.0=py39ha08a7e4_0
   - pip=22.3.1=pyhd8ed1ab_0
   - pooch=1.4.0=pyhd3eb1b0_0
@@ -92,15 +93,18 @@ dependencies:
   - pyparsing=3.0.4=pyhd3eb1b0_0
   - pysocks=1.7.1=py39h06a4308_0
   - python=3.9.15=hba424b6_0_cpython
+  - python-dateutil=2.8.2=pyhd8ed1ab_0
   - python_abi=3.9=3_cp39
   - pytorch=1.13.1=cpu_py39h14c4022_0
   - pytorch-mutex=1.0=cpu
+  - pytz=2022.7.1=pyhd8ed1ab_0
   - pyyaml=6.0=py39hb9d737c_5
   - readline=8.1.2=h0f457ee_0
   - requests=2.28.1=py39h06a4308_0
   - scikit-learn=1.1.1=py39h6a678d5_0
   - scipy=1.10.0=py39h7360e5f_0
   - setuptools=66.0.0=pyhd8ed1ab_0
+  - six=1.16.0=pyh6c4a22f_0
   - sleef=3.5.1=h9b69904_2
   - svt-av1=1.4.1=hcb278e6_0
   - tbb=2021.7.0=h924138e_1

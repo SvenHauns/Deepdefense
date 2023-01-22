@@ -5,15 +5,18 @@ import collections
 import glob
 import pickle
 import numpy as np
-
+import pandas as pd
 
     
-def save_to_output(data_list, output_file, file_name):
+def save_to_output(data_list, output_file, file_name, first_output):
 
     if data_list == []: return
 
-    file_ = open(output_file, "a")
     
+    cassette_detected_list = []
+    indeces_list = []
+    name_list = []
+
     
     for data in data_list:
     
@@ -29,19 +32,16 @@ def save_to_output(data_list, output_file, file_name):
             if cassette_detected != "": cassette_detected = cassette_detected + "_"
             cassette_detected = cassette_detected + cas_type
             
+        cassette_detected_list.append(cassette_detected)
         indeces = data[2]
-        
-        file_.write(file_name)
-        file_.write("\t")
-        file_.write(str(cassette_detected))
-        file_.write("\t")
-        file_.write(str(indeces[0: len(indeces)-none_counter -1]))
-        file_.write("\n")
-        
+        indeces_list.append(str(indeces[0: len(indeces)-none_counter -1]))
+        name_list.append(file_name)
+
+
+
+    df = pd.DataFrame(list(zip(name_list, cassette_detected_list, indeces_list)), columns =['file', 'cassette', 'indeces'])
+    df.to_csv(output_file,  mode='a',header = first_output)
     
-    file_.close()
-
-
 
     return
     
@@ -203,11 +203,11 @@ if __name__ == '__main__':
                                 help='Name of file',
                                 type=str)
     cmdline_parser.add_argument('-o', '--output_file_name',
-                                default="./output.txt",
+                                default="./output.csv",
                                 help='Name of output file',
                                 type=str)
     cmdline_parser.add_argument('-q', '--output_file_name_candidates',
-                                default="./output_candidates.txt",
+                                default="./output_candidates.csv",
                                 help='Name of output file for new candidates',
                                 type=str)
     cmdline_parser.add_argument('-m', '--max_distance',
@@ -269,6 +269,7 @@ if __name__ == '__main__':
 
 
     rule_count = {"Dru": 0, "Gaj": 0, "Ham": 0, "Jet": 0, "Kwa": 0, "Lmu": 0, "Ptu": 0, "Sdu": 0, "Zor": 0, "Ths": 0}
+    first_output = True
 
     for en, file_ in enumerate(files):
 
@@ -299,7 +300,7 @@ if __name__ == '__main__':
         confirmed_rules_dict = check_order(confirmed_rules_dict)
         unique_list = extract_unique_list(confirmed_rules_dict)
         
-        save_to_output(unique_list, args.output_file_name, file_)
+        save_to_output(unique_list, args.output_file_name, file_, first_output)
 
         for un_list in unique_list:
             rule_count[un_list[1][0][:-1]] = rule_count[un_list[1][0][:-1]] + 1
@@ -311,7 +312,8 @@ if __name__ == '__main__':
         unique_list_full = extract_unique_list(confirmed_rules_dict)        
         unique_list_cand = [unique for unique in unique_list_full if unique not in unique_list]
         
-        save_to_output(unique_list_cand, args.output_file_name_candidates, file_)
+        save_to_output(unique_list_cand, args.output_file_name_candidates, file_, first_output)
+        first_output = False
 
 
             
