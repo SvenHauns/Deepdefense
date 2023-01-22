@@ -19,7 +19,6 @@ def save_to_output(data_list, output_file, file_name):
     
         cassette_detected = ""
         none_counter = 0
-        print(data[1][::-1])
         for enum, d in enumerate(data[1][::-1]):
             if d == "None":
                 none_counter = enum
@@ -54,7 +53,7 @@ def read_yaml(file_name):
     return documents
 
 
-def build_cassette(classes_val, cassette_dict, rules):
+def build_cassette(classes_val, cassette_dict, rules, min_correspondence, max_distance, cutoff):
     confirmed_rules_dict = {}
     for enum, val in enumerate(classes_val):
 
@@ -200,12 +199,16 @@ if __name__ == '__main__':
     cmdline_parser = argparse.ArgumentParser('cassette final prediction')
 
     cmdline_parser.add_argument('-t', '--data_folder',
-                                default="./Dru_ype1.faa",
+                                default="./results/",
                                 help='Name of file',
                                 type=str)
     cmdline_parser.add_argument('-o', '--output_file_name',
                                 default="./output.txt",
                                 help='Name of output file',
+                                type=str)
+    cmdline_parser.add_argument('-q', '--output_file_name_candidates',
+                                default="./output_candidates.txt",
+                                help='Name of output file for new candidates',
                                 type=str)
     cmdline_parser.add_argument('-m', '--max_distance',
                                 default=2,
@@ -223,8 +226,8 @@ if __name__ == '__main__':
 
     dict_ = collections.defaultdict(list)
 
-    max_distance = 2
-    min_correspondence = 2
+    max_distance = args.max_distance
+    min_correspondence = args.min_correspondence
 
     rules = read_yaml("cassette_rules.yaml")
 
@@ -248,9 +251,22 @@ if __name__ == '__main__':
               'JetA': 0.5488773294162843, 'JetB': 0.5666785275161094, 'JetC': 0.7427312126980701,
               'JetD': 0.5024555669358747, 'KwaA': 0.7721718331879318, 'KwaB': 0.5489610274356479,
               'LmuA': 0.5386696555682484, 'LmuB': 0.667394933203811, 'PtuA': 0.5123853729026722,
-              'PtuB': 0.6300281324261889, 'SduA': 0.99, 'ZorA': 0.8692443040839756, 'ZorB': 0.779199939376295,
+              'PtuB': 0.6300281324261889, 'SduA': 0.9999, 'ZorA': 0.8692443040839756, 'ZorB': 0.779199939376295,
               'ZorC': 0.5772270157652536, 'ZorD': 0.5564549738181166, 'ZorE': 0.7237467068982661,
               'ThsA': 0.6048928067342549, 'ThsB': 0.5107287802712881}
+              
+              
+    cutoff2 = {'DruA': 0.877205558224107, 'DruB': 0.6869913759403454, 'DruC': 0.6763719078140566,
+              'DruD': 0.7171405572266198, 'DruE': 0.8125080156944241, 'DruF': 0.762761360160007,
+              'DruG': 0.7916123054866939, 'DruH': 0.5323820506732992, 'DruM': 0.6416379451115569, 'GajA': 0.5,
+              'GajB': 0.5, 'HamA': 0.5, 'HamB': 0.5464090466048177, 'JetA': 0.5, 'JetB': 0.5, 'JetC': 0.577789624178313,
+              'JetD': 0.5, 'KwaA': 0.6831642709306246, 'KwaB': 0.5184215383960489, 'LmuA': 0.5219699654917086,
+              'LmuB': 0.6136418085443905, 'PtuA': 0.5, 'PtuB': 0.5129453303289242, 'SduA': 0.9999,
+              'ZorA': 0.8244179540929377, 'ZorB': 0.6716363303764181, 'ZorC': 0.5309060489041153,
+              'ZorD': 0.5209430589256463, 'ZorE': 0.6729111781637771, 'ThsA': 0.5228257677482349, 'ThsB': 0.5}
+              
+              
+
 
     rule_count = {"Dru": 0, "Gaj": 0, "Ham": 0, "Jet": 0, "Kwa": 0, "Lmu": 0, "Ptu": 0, "Sdu": 0, "Zor": 0, "Ths": 0}
 
@@ -279,16 +295,27 @@ if __name__ == '__main__':
 
         cassette_dict = {}
 
-        confirmed_rules_dict = build_cassette(classes_val, cassette_dict, rules)
-
+        confirmed_rules_dict = build_cassette(classes_val, cassette_dict, rules, min_correspondence, max_distance, cutoff)
         confirmed_rules_dict = check_order(confirmed_rules_dict)
         unique_list = extract_unique_list(confirmed_rules_dict)
         
         save_to_output(unique_list, args.output_file_name, file_)
 
-
         for un_list in unique_list:
             rule_count[un_list[1][0][:-1]] = rule_count[un_list[1][0][:-1]] + 1
+            
+            
+            
+        confirmed_rules_dict = build_cassette(classes_val, cassette_dict, rules, min_correspondence, max_distance, cutoff2)
+        confirmed_rules_dict = check_order(confirmed_rules_dict)
+        unique_list_full = extract_unique_list(confirmed_rules_dict)        
+        unique_list_cand = [unique for unique in unique_list_full if unique not in unique_list]
+        
+        save_to_output(unique_list_cand, args.output_file_name_candidates, file_)
+
+
+            
+            
 
     print("deep")
     print(rule_count)

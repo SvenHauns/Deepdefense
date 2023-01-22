@@ -69,8 +69,8 @@ def run_net(train_loader, val_loader, weights, saver, network_type, epochs, cali
 
         sheduler.step()
 
-        print('Epoch: {:02d}, Loss: {:.4f}, Validation: {:.4f}, Validation_Acc: {:.4f}'.format(
-            epoch, loss, validation, val_acc))
+        print('Epoch: {:02d}, Loss: {:.4f}, Validation_Acc: {:.4f}'.format(
+            epoch, loss, val_acc))
 
 
     return saved_model, best_epoch, best_epoch_acc
@@ -131,9 +131,9 @@ if __name__ == '__main__':
     models_for_ens = 3
 
     
-    files_train = args.train_file_name
-    files_test = args.test_file_name
-    files_validate = args.validate_file_name
+    files_train = args.train_file
+    files_test = args.test_file
+    files_validate = args.val_file
         
 
     classes = len(files_train)

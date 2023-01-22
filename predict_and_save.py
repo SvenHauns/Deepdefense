@@ -67,12 +67,6 @@ def file_reformat(file_):
 
 
 
-def read_yaml(file_name):
-    with open(file_name) as file:
-        documents = yaml.full_load(file)
-
-    return documents
-
 
 def main_func(args, dict_, file_, model_list_ens, classes, calibration_method = "DOC"):
     max_lines = len(open(file_).readlines())

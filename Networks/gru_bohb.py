@@ -25,7 +25,8 @@ class gru(torch.nn.Module):
         self.linear2 = torch.nn.Linear(lin_in//4, lin_in//8)
         self.batch_norm3 = torch.nn.BatchNorm1d(lin_in//8)
         self.linear3 = torch.nn.Linear(lin_in//8, classes)
-
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        
     def forward(self, data):
 
         x, z_data = data[0], data[2]
@@ -36,7 +37,7 @@ class gru(torch.nn.Module):
         x = F.dropout(x, p=self.dropout, training=self.training)
         x = x.permute(0, 2, 1)
 
-        hidden = torch.tensor(torch.zeros(4, batch_size, self.arch[3]).numpy())
+        hidden = torch.tensor(torch.zeros(4, batch_size, self.arch[3]).numpy()).to(self.device)
         x = F.dropout(x, p=self.dropout, training=self.training)
         x, hidden = self.GRU(x, hidden)
         x = x.contiguous().view(batch_size, -1)
