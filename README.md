@@ -61,7 +61,7 @@ conda activate crispr_identify_env
 
 Due to the file size restrictions of github, models are available on:
 
-https://drive.google.com/file/d/1sEBtVYExPIl47-YmkNTzVDDU42aFA7vb/view?usp=sharing
+https://drive.google.com/file/d/1qKGUu8P143yezrX0nCFHh25vBLTTmtJ3/view?usp=share_link
 https://drive.google.com/file/d/1Obek8fj2G67UeDVN-95Em_msagcgb1qO/view?usp=sharing
 
 
