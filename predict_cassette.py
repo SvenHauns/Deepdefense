@@ -314,10 +314,3 @@ if __name__ == '__main__':
         
         save_to_output(unique_list_cand, args.output_file_name_candidates, file_, first_output)
         first_output = False
-
-
-            
-            
-
-    print("deep")
-    print(rule_count)
