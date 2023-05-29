@@ -100,6 +100,12 @@ To create the model predictions run:
 python predict_and_save.py -f <data_folder> -r <results_folder>
 
 ```
+e.g.
+```
+python predict_and_save.py -f ./data/ -r ./results/
+
+```
+
 
 The results will be save as a pickle file in <results_folder>.
 
@@ -121,7 +127,7 @@ additionally we provide flags for:
 To predict the cassettes run the command below with the output of the step above. This creates the output file.
 
 ```
-python predict_cassette.py -f <data_folder>
+python predict_cassette.py -f <results_folder>
 
 ```
 
