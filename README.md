@@ -38,17 +38,17 @@ Then we create an environment. The necessary setup is provided in the "environme
 In order to install the corresponding environment one can execute the following command from the "for_environment" directory
 
 ```
-conda env create -f environment.yml
+conda env create -f environment.yml --name deepdef
 ```
 
 
 
 ### Activation of the environment
 
-Before running CRISPRidentify one need to activate the corresponding environment.
+Before running DeepDefense one need to activate the corresponding environment.
 
 ```
-conda activate crispr_identify_env
+conda activate deepdef
 ```
 
 
@@ -64,6 +64,7 @@ Due to the file size restrictions of github, models are available on:
 https://drive.google.com/file/d/1qKGUu8P143yezrX0nCFHh25vBLTTmtJ3/view?usp=share_link
 https://drive.google.com/file/d/1Obek8fj2G67UeDVN-95Em_msagcgb1qO/view?usp=sharing
 
+Put them in a models folder and extract the models.
 
 ### Training custom models
 
