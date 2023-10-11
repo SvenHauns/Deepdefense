@@ -154,7 +154,7 @@ The output details the file, the rules found, the indeces of the proteins used f
 
 We are constantly working on the improvements of Deepdefense. If you found a bug please submit via github issue interface.
 
-
+Additionaly unrelated data can be found here: https://drive.google.com/file/d/16nXnZtSR5dAT4w2mojlm-Yn8vGgJTCi6/view?usp=sharing
 
 
 
